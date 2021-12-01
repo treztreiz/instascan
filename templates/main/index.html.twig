@@ -2,6 +2,11 @@
 
 {% block body %}
 
-<video id="preview" width="320" height="240"></video>
+  <div class="mb-3">
+    <label for="cameras" class="form-label">Camera sélectionnée :</label>
+    <select id="cameras" class="form-select" aria-label="Default select example"></select>
+  </div>
+
+  <div id="reader" width="600px"></div>
 
 {% endblock %}

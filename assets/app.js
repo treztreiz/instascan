@@ -11,22 +11,65 @@ import './styles/app.css';
 // start the Stimulus application
 import './bootstrap';
 
-import Instascan from 'instascan'
+import 'bootstrap'
 
-let scanner = new Instascan.Scanner({ 
-    video: document.getElementById('preview') 
-})
+import {Html5Qrcode} from "html5-qrcode"
 
-scanner.addListener('scan', function (content) {
-    console.log(content);
-})
+const qrCode = new Html5Qrcode("reader");
+const cameraSelect = document.getElementById('cameras')
 
-Instascan.Camera.getCameras().then(function (cameras) {
-    if (cameras.length > 0) {
-        scanner.start(cameras[0])
-    } else {
-        console.error('No cameras found.')
+Html5Qrcode.getCameras().then(devices => {
+
+    if(!devices || devices && !devices.length) {
+
+        const option = document.createElement('option')
+        option.innerHTML = 'Aucune camera accessible'
+        cameraSelect.appendChild(option)
+
+        return
     }
-}).catch(function (e) {
-    console.error(e)
+
+    for( let i = 0;  i < devices.length; i++) {
+
+        const option = document.createElement('option')
+        option.innerHTML = devices[i].label 
+        option.value = devices[i].id
+        cameraSelect.appendChild(option)
+
+    }
+
+    startQrCode(cameraSelect.value)
+
+  }).catch(err => {
+    console.error(err)
+});
+
+cameraSelect.addEventListener('change', (e) => {
+
+    qrCode.stop().then((ignore) => {
+        startQrCode(e.currentTarget.value)
+    }).catch((err) => {
+        console.error(err)
+    });
+
+    
 })
+
+function startQrCode(cameraId) {
+    qrCode.start(
+        cameraId, 
+        {
+          fps: 10,    // Optional, frame per seconds for qr code scanning
+          qrbox: { width: 250, height: 250 }  // Optional, if you want bounded box UI
+        },
+        (decodedText, decodedResult) => {
+          // do something when code is read
+            alert(decodedText)
+        },
+        (errorMessage) => {
+            console.error(errorMessage)
+        })
+      .catch((err) => {
+        // Start failed, handle it.
+    });
+}
